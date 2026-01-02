@@ -1161,7 +1161,7 @@ class MmuAceController:
                 endless_spool_enabled = True,  # Enable endless spool for backup roll functionality
                 reason_for_pause = "",
                 extruder_filament_remaining = -1,
-                spoolman_support = self.ace_controller.spoolman_support,
+                spoolman_support = self.spoolman_support,
                 sensors = {},
                 espooler_active = "",
                 servo = "",
