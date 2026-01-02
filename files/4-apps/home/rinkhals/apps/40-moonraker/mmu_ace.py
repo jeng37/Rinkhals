@@ -537,8 +537,18 @@ class MmuAceController:
     printer: PrinterController
 
     def __init__(self, server: Server, host: str | None):
+        
         self.server = server
         self.eventloop = self.server.get_event_loop()
+        # --- Spoolman integration state (PATCH 2) ---
+        # off | readonly | push | pull
+        self.spoolman_support = "off"
+
+        # Prevent parallel spoolman tasks
+        self._spoolman_task = None
+        self._last_spoolman_sync = 0.0
+        # -------------------------------------------
+
         self._last_status_update = 0.0
         self._status_update_task: Optional[asyncio.Task] = None
         self._status_update_delay = 0.2  # 200ms debounce for rapid commands
@@ -563,6 +573,23 @@ class MmuAceController:
         # Start periodic cache cleanup task (runs every 60 seconds)
         # Removes expired temperature cache entries to prevent slow memory leak
         asyncio.create_task(self._periodic_cache_cleanup())
+    
+    async def _run_spoolman_task(self, coro):
+        """
+        Run exactly one Spoolman coroutine at a time.
+        Never block the Moonraker event loop.
+        """
+        if self._spoolman_task and not self._spoolman_task.done():
+            return
+
+        async def runner():
+            try:
+                await coro
+            except Exception as e:
+                logging.warning(f"[Spoolman] non-fatal error: {e}")
+
+        self._spoolman_task = self.eventloop.create_task(runner())
+
 
     def _handle_status_update(self, force: bool = False, throttle: bool = False):
         """Send status update notification with debouncing or throttling.
@@ -1134,7 +1161,7 @@ class MmuAceController:
                 endless_spool_enabled = True,  # Enable endless spool for backup roll functionality
                 reason_for_pause = "",
                 extruder_filament_remaining = -1,
-                spoolman_support = "off",  # off/readonly/push/pull - we don't use spoolman
+                spoolman_support = self.ace_controller.spoolman_support,
                 sensors = {},
                 espooler_active = "",
                 servo = "",

@@ -1,0 +1,2 @@
+# Force LF for python files
+*.py text eol=lf
