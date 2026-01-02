@@ -1548,9 +1548,7 @@ async def _on_gcode_mmu_select(self, args: dict[str, str | None], delegate):
                     _, gate_obj = gate_lookup
                     spool_id = gate_obj.spool_id if gate_obj.spool_id > 0 else None
 
-                    self.ace_controller._run_spoolman_task(
-                        await self.ace_controller._spoolman_set_active_spool(spool_id)
-                    )
+                    await self.ace_controller._spoolman_set_active_spool(spool_id)
             # ---------------------------------------
 
         else:
@@ -1579,9 +1577,7 @@ async def _on_gcode_mmu_select(self, args: dict[str, str | None], delegate):
                     _, gate_obj = gate_lookup
                     spool_id = gate_obj.spool_id if gate_obj.spool_id > 0 else None
 
-                    self.ace_controller._run_spoolman_task(
-                        await self.ace_controller._spoolman_set_active_spool(spool_id)
-                    )
+                    await self.ace_controller._spoolman_set_active_spool(spool_id)
             # ---------------------------------------
 
         else:
