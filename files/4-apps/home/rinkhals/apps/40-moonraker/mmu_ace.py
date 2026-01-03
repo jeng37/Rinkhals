@@ -1124,6 +1124,8 @@ class MmuAceController:
         self._handle_status_update(force=True)
 
     def get_status(self) -> MmuAceStatus:
+        if not hasattr(self, "ace") or self.ace is None:
+            return MmuAceStatus()
 
         gates = [gate for gates in [unit.gates for unit in self.ace.units] for gate in gates]
         num_gates = len(gates)
